@@ -1,0 +1,99 @@
+import type { Simplify, ParseContext } from '../../types.js';
+import { Schema } from '../Schema.js';
+
+export type Shape = Record<string, Schema<unknown>>;
+
+export type InferShape<S extends Shape> = Simplify<
+    {
+        [K in keyof S as undefined extends (S[K] extends Schema<infer U> ? U : never)
+            ? K
+            : never]?: Exclude<S[K] extends Schema<infer U> ? U : never, undefined>
+    }
+    &
+    {
+        [K in keyof S as undefined extends (S[K] extends Schema<infer U> ? U : never)
+            ? never
+            : K]: S[K] extends Schema<infer U> ? U : never
+    }
+>;
+
+type Mode = 'strip' | 'passthrough';
+
+export class ObjectSchema<T extends Shape> extends Schema<InferShape<T>> {
+    constructor(
+        private shape: T,
+        private mode: Mode = 'strip',
+    ) { super(); }
+
+    protected _parse(input: unknown, ctx: ParseContext): InferShape<T> {
+        if (Object.prototype.toString.call(input) !== '[object Object]') {
+            this.makeIssue({
+                ctx,
+                message: 'Converted to object',
+                level: 'info',
+                expected: 'object',
+                received: input,
+            });
+        }
+
+        const object: Record<string, unknown> = { ...(input as object) };
+
+        const result: Record<string, unknown> = {};
+
+        for (const key in this.shape) {
+            ctx.path.push(key);
+            result[key] = this.invokeParse(this.shape[key]!, object[key], ctx);
+            ctx.path.pop();
+        }
+
+        if (this.mode === 'passthrough') {
+            for (const key in object) {
+                if (!(key in this.shape)) {
+                    result[key] = object[key];
+                }
+            }
+        }
+
+        return result as InferShape<T>;
+    }
+
+    get strip(): ObjectSchema<T> {
+        return new ObjectSchema(this.shape, 'strip');
+    }
+
+    get passthrough(): ObjectSchema<T> {
+        return new ObjectSchema(this.shape, 'passthrough');
+    }
+
+    extend<U extends Shape>(newShape: U): ObjectSchema<T & U> {
+        return new ObjectSchema(
+            { ...this.shape, ...newShape },
+            this.mode,
+        );
+    }
+
+    pick<K extends keyof T>(keys: K[]): ObjectSchema<Pick<T, K>> {
+        const pickedShape: Partial<T> = {};
+        for (const key of keys) {
+            if (key in this.shape) {
+                pickedShape[key] = this.shape[key];
+            }
+        }
+        return new ObjectSchema(pickedShape as Pick<T, K>, this.mode);
+    }
+
+    override preprocess(fn: (input: unknown) => unknown): ObjectSchema<T> {
+        const parent = this;
+
+        return new (class extends ObjectSchema<T> {
+            constructor() {
+                super(parent.shape, parent.mode);
+            }
+
+            protected _parse(input: unknown, ctx: ParseContext) {
+                const transformed = fn(input);
+                return this.invokeParse(parent, transformed, ctx);
+            }
+        })();
+    }
+}

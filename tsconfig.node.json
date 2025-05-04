@@ -1,0 +1,19 @@
+{
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "noEmit": true,
+        "module": "NodeNext",
+        "moduleResolution": "nodenext",
+        "types": [
+            "node",
+        ],
+        "lib": [
+            "ES2023",
+        ],
+        "checkJs": true,
+    },
+    "include": [
+        "*.js",
+        "*.ts",
+    ],
+}

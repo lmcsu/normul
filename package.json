@@ -1,0 +1,61 @@
+{
+    "name": "normul",
+    "version": "0.1.0",
+    "type": "module",
+    "exports": {
+        ".": {
+            "import": "./lib/index.js",
+            "types": "./lib/index.d.ts"
+        }
+    },
+    "files": [
+        "./lib/**/*"
+    ],
+    "scripts": {
+        "build": "run-s clear build:lib",
+        "build:lib": "tsc --project ./tsconfig.lib.json",
+        "clear": "rimraf --glob ./lib/*",
+        "dev": "run-s clear dev:lib",
+        "dev:lib": "pnpm --silent build:lib --watch",
+        "lint": "eslint .",
+        "type-check": "run-p --silent type-check:node type-check:lib",
+        "type-check:lib": "tsc -p tsconfig.lib.json",
+        "type-check:node": "tsc -p tsconfig.node.json"
+    },
+    "license": "ISC",
+    "description": "Normul is a tiny TypeScript/JavaScript library for data normalization and transformation",
+    "keywords": [
+        "normalization",
+        "transformation",
+        "data",
+        "normalizer",
+        "transformer",
+        "schema",
+        "coercion",
+        "casting",
+        "parsing",
+        "sanitization",
+        "schema-builder"
+    ],
+    "repository": {
+		"type": "git",
+		"url": "git+https://github.com/lmcsu/normul.git"
+	},
+	"bugs": {
+		"url": "https://github.com/lmcsu/normul/issues"
+	},
+    "devDependencies": {
+        "@eslint/js": "^9.26.0",
+        "@stylistic/eslint-plugin": "^4.2.0",
+        "@types/node": "^22.15.3",
+        "eslint": "^9.26.0",
+        "eslint-plugin-n": "^17.17.0",
+        "eslint-plugin-unicorn": "^59.0.0",
+        "globals": "^16.0.0",
+        "jiti": "^2.4.2",
+        "npm-run-all2": "^8.0.1",
+        "rimraf": "^6.0.1",
+        "typescript": "^5.8.3",
+        "typescript-eslint": "^8.31.1"
+    }
+}
