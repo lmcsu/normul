@@ -1,6 +1,6 @@
 {
     "name": "normul",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "type": "module",
     "exports": {
         ".": {
@@ -39,12 +39,12 @@
         "schema-builder"
     ],
     "repository": {
-		"type": "git",
-		"url": "git+https://github.com/lmcsu/normul.git"
-	},
-	"bugs": {
-		"url": "https://github.com/lmcsu/normul/issues"
-	},
+        "type": "git",
+        "url": "git+https://github.com/lmcsu/normul.git"
+    },
+    "bugs": {
+        "url": "https://github.com/lmcsu/normul/issues"
+    },
     "devDependencies": {
         "@eslint/js": "^9.26.0",
         "@stylistic/eslint-plugin": "^4.2.0",
