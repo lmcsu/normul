@@ -82,6 +82,16 @@ export class ObjectSchema<T extends Shape> extends Schema<InferShape<T>> {
         return new ObjectSchema(pickedShape as Pick<T, K>, this.mode);
     }
 
+    omit<K extends keyof T>(keys: K[]): ObjectSchema<Omit<T, K>> {
+        const omittedShape: Partial<T> = { ...this.shape };
+        for (const key of keys) {
+            if (key in omittedShape) {
+                delete omittedShape[key];
+            }
+        }
+        return new ObjectSchema(omittedShape as Omit<T, K>, this.mode);
+    }
+
     override preprocess(fn: (input: unknown) => unknown): ObjectSchema<T> {
         const parent = this;
 

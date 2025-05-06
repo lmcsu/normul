@@ -84,6 +84,7 @@ console.log(issues); // [{ message: 'Normalized literal', ... }]
 - `.strip` / `.passthrough` (for objects) — control extra keys
 - `.extend({...})` (for objects) — add fields
 - `.pick([...])` (for objects) — select fields
+- `.omit([...])` (for objects) — exclude fields
 
 ---
 

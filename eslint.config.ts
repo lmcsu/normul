@@ -61,6 +61,7 @@ export default [
             '@typescript-eslint/no-non-null-assertion': ['off'],
             '@typescript-eslint/no-this-alias': ['off'],
             '@typescript-eslint/restrict-template-expressions': ['off'],
+            '@typescript-eslint/no-dynamic-delete': ['off'],
             'unicorn/filename-case': ['off'],
             'unicorn/no-await-expression-member': ['off'],
             'unicorn/no-lonely-if': ['off'],
