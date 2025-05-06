@@ -11,6 +11,7 @@
     "files": [
         "./lib/**/*"
     ],
+    "sideEffects": false,
     "scripts": {
         "build": "run-s clear build:lib",
         "build:lib": "tsc --project ./tsconfig.lib.json",
