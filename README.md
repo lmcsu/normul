@@ -125,6 +125,31 @@ console.log(data);
 
 ---
 
+## Type Inference with n.Infer
+
+Normul lets you extract the TypeScript type from a schema using the `n.Infer` utility:
+
+```ts
+import * as n from 'normul';
+
+const user = n.object({
+  id: n.number,
+  name: n.string,
+  tags: n.array(n.string),
+});
+
+// Extract the user type from the schema:
+type User = n.Infer<typeof user>;
+// User:
+// {
+//   id: number;
+//   name: string;
+//   tags: string[];
+// }
+```
+
+---
+
 ## What you get
 - **Predictable**: No exceptions, just normalized data and a list of what got changed.
 - **Explicit**: You always know what happens to your data.
