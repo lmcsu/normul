@@ -71,6 +71,8 @@ console.log(issues); // [{ message: 'Normalized literal', ... }]
 - `n.union(a, b, ...)` — tries schemas in order, picks the first that fits
 - `n.tuple(a, b, ...)` — fixed-length arrays
 - `n.discriminatedUnion(discriminator, ...schemas)` — smart union by field
+- `n.any` — pass-through with `any` type
+- `n.unknown` — pass-through with `unknown` type
 - `n.type<T>()` — pass-through for advanced typing
 
 ---

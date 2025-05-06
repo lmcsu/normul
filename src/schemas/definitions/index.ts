@@ -1,3 +1,4 @@
+export * from './AnySchema.js';
 export * from './ArraySchema.js';
 export * from './BooleanSchema.js';
 export * from './LiteralSchema.js';
@@ -9,3 +10,4 @@ export * from './StringSchema.js';
 export * from './TupleSchema.js';
 export * from './UndefinedSchema.js';
 export * from './UnionSchema.js';
+export * from './UnknownSchema.js';

@@ -1,4 +1,5 @@
 import {
+    AnySchema,
     ArraySchema,
     BooleanSchema,
     DiscriminatedUnionSchema,
@@ -13,8 +14,11 @@ import {
     TypeSchema,
     UndefinedSchema,
     UnionSchema,
+    UnknownSchema,
     type Shape,
 } from './schemas/index.js';
+
+export const any = new AnySchema();
 
 export function array<T>(schema: Schema<T>): ArraySchema<T> {
     return new ArraySchema(schema);
@@ -64,3 +68,5 @@ export function union<T extends [Schema<unknown>, ...Schema<unknown>[]]>(
 ): UnionSchema<T> {
     return new UnionSchema(schemas);
 }
+
+export const unknown = new UnknownSchema();
