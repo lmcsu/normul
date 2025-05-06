@@ -6,7 +6,7 @@ const ISSUE_LEVELS = {
     info: 2,
 } as const satisfies Record<'none' | Issue['level'], number>;
 
-export abstract class Schema<T> {
+export abstract class Schema<T = unknown> {
     parse(input: unknown, options?: {
         issueLevel: keyof typeof ISSUE_LEVELS;
     }): ParseResult<T> {

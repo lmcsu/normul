@@ -5,7 +5,7 @@ export type Simplify<T> =
         ? { [K in keyof T]: T[K] } & {}
         : T;
 
-export type Infer<T extends Schema<unknown>> =
+export type Infer<T extends Schema> =
     T extends Schema<infer U>
         ? Simplify<U>
         : never;

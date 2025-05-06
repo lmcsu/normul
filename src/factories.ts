@@ -26,7 +26,7 @@ export function array<T>(schema: Schema<T>): ArraySchema<T> {
 
 export const boolean = new BooleanSchema();
 
-export function discriminatedUnion<T extends [Schema<unknown>, ...Schema<unknown>[]]>(
+export function discriminatedUnion<T extends [Schema, ...Schema[]]>(
     discriminator: string,
     ...schemas: T
 ): DiscriminatedUnionSchema<T> {
@@ -63,7 +63,7 @@ export function type<T>(): TypeSchema<T> {
 
 export const undefinedValue = new UndefinedSchema();
 
-export function union<T extends [Schema<unknown>, ...Schema<unknown>[]]>(
+export function union<T extends [Schema, ...Schema[]]>(
     ...schemas: T
 ): UnionSchema<T> {
     return new UnionSchema(schemas);

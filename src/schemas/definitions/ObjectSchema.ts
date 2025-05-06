@@ -1,7 +1,7 @@
 import type { Simplify, ParseContext } from '../../types.js';
 import { Schema } from '../Schema.js';
 
-export type Shape = Record<string, Schema<unknown>>;
+export type Shape = Record<string, Schema>;
 
 export type InferShape<S extends Shape> = Simplify<
     {

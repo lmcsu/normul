@@ -2,15 +2,15 @@ import type { ParseContext, Simplify } from '../../types.js';
 import { Schema } from '../Schema.js';
 import { ObjectSchema } from './ObjectSchema.js';
 
-type InferUnion<T extends Schema<unknown>[]> =
+type InferUnion<T extends Schema[]> =
     Simplify<T[number] extends Schema<infer U> ? U : never>;
 
-interface Candidate<T extends Schema<unknown>[]> {
+interface Candidate<T extends Schema[]> {
     data: InferUnion<T>;
     ctx: ParseContext;
 }
 
-export class UnionSchema<T extends [Schema<unknown>, ...Schema<unknown>[]]> extends Schema<InferUnion<T>> {
+export class UnionSchema<T extends [Schema, ...Schema[]]> extends Schema<InferUnion<T>> {
     constructor(
         protected readonly schemas: T,
     ) { super(); }
@@ -74,7 +74,7 @@ export class UnionSchema<T extends [Schema<unknown>, ...Schema<unknown>[]]> exte
     }
 }
 
-export class DiscriminatedUnionSchema<T extends [Schema<unknown>, ...Schema<unknown>[]]> extends UnionSchema<T> {
+export class DiscriminatedUnionSchema<T extends [Schema, ...Schema[]]> extends UnionSchema<T> {
     constructor(
         protected readonly discriminator: string,
         schemas: T,
