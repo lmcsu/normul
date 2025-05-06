@@ -1,6 +1,9 @@
 import type { Schema } from './schemas/Schema.js';
 
-export type Simplify<T> = { [K in keyof T]: T[K] } & {};
+export type Simplify<T> =
+    T extends object
+        ? { [K in keyof T]: T[K] } & {}
+        : T;
 
 export type Infer<T extends Schema<unknown>> =
     T extends Schema<infer U>
