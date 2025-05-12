@@ -3,7 +3,7 @@
 import { Schema } from '../Schema.js';
 
 export class AnySchema extends Schema<any> {
-    protected _parse(input: any): any {
+    protected _normalize(input: any): any {
         return input;
     }
 }

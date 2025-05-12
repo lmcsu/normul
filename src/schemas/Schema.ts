@@ -7,7 +7,7 @@ const ISSUE_LEVELS = {
 } as const satisfies Record<'none' | Issue['level'], number>;
 
 export abstract class Schema<T = unknown> {
-    parse(input: unknown, options?: {
+    normalize(input: unknown, options?: {
         issueLevel: keyof typeof ISSUE_LEVELS;
     }): ParseResult<T> {
         const { issueLevel = 'info' } = options ?? {};
@@ -16,7 +16,7 @@ export abstract class Schema<T = unknown> {
             path: [],
             issues: [],
         };
-        const data = this._parse(input, ctx);
+        const data = this._normalize(input, ctx);
 
         let issues: Issue[] = [];
         const issueLevelThreshold = ISSUE_LEVELS[issueLevel];
@@ -32,10 +32,10 @@ export abstract class Schema<T = unknown> {
         };
     }
 
-    protected abstract _parse(input: unknown, ctx: ParseContext): T;
+    protected abstract _normalize(input: unknown, ctx: ParseContext): T;
 
-    protected invokeParse<U>(schema: Schema<U>, input: unknown, ctx: ParseContext): U {
-        return schema._parse(input, ctx);
+    protected invokeNormalize<U>(schema: Schema<U>, input: unknown, ctx: ParseContext): U {
+        return schema._normalize(input, ctx);
     }
 
     protected makeIssue(options: {
@@ -80,11 +80,11 @@ export class DefaultSchema<T> extends Schema<T> {
         private defaultValue: T,
     ) { super(); }
 
-    protected _parse(input: unknown, ctx: ParseContext): T {
+    protected _normalize(input: unknown, ctx: ParseContext): T {
         if (input === undefined || input === null) {
             return this.defaultValue;
         }
-        return this.invokeParse(this.inner, input, ctx);
+        return this.invokeNormalize(this.inner, input, ctx);
     }
 }
 
@@ -93,11 +93,11 @@ export class NullableSchema<T> extends Schema<T | null> {
         private inner: Schema<T>,
     ) { super(); }
 
-    protected _parse(input: unknown, ctx: ParseContext): T | null {
+    protected _normalize(input: unknown, ctx: ParseContext): T | null {
         if (input === null) {
             return null;
         }
-        return this.invokeParse(this.inner, input, ctx);
+        return this.invokeNormalize(this.inner, input, ctx);
     }
 }
 
@@ -106,11 +106,11 @@ export class OptionalSchema<T> extends Schema<T | undefined> {
         private inner: Schema<T>,
     ) { super(); }
 
-    protected _parse(input: unknown, ctx: ParseContext): T | undefined {
+    protected _normalize(input: unknown, ctx: ParseContext): T | undefined {
         if (input === undefined) {
             return undefined;
         }
-        return this.invokeParse(this.inner, input, ctx);
+        return this.invokeNormalize(this.inner, input, ctx);
     }
 }
 
@@ -120,7 +120,7 @@ export class PreprocessSchema<T> extends Schema<T> {
         private fn: (input: unknown) => unknown,
     ) { super(); }
 
-    protected _parse(input: unknown, ctx: ParseContext): T {
+    protected _normalize(input: unknown, ctx: ParseContext): T {
         let prep = input;
         try {
             prep = this.fn(input);
@@ -134,7 +134,7 @@ export class PreprocessSchema<T> extends Schema<T> {
             });
         }
 
-        return this.invokeParse(this.inner, prep, ctx);
+        return this.invokeNormalize(this.inner, prep, ctx);
     }
 }
 
@@ -144,8 +144,8 @@ export class TransformSchema<T, U> extends Schema<U> {
         private fn: (input: T) => U,
     ) { super(); }
 
-    protected _parse(input: unknown, ctx: ParseContext): U {
-        const data = this.invokeParse(this.inner, input, ctx);
+    protected _normalize(input: unknown, ctx: ParseContext): U {
+        const data = this.invokeNormalize(this.inner, input, ctx);
 
         try {
             return this.fn(data);
@@ -163,7 +163,7 @@ export class TransformSchema<T, U> extends Schema<U> {
 }
 
 export class TypeSchema<T> extends Schema<T> {
-    protected _parse(input: unknown): T {
+    protected _normalize(input: unknown): T {
         return input as T;
     }
 }

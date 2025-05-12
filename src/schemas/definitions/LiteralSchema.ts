@@ -6,7 +6,7 @@ export class LiteralSchema<T extends string | number | boolean | null | undefine
         private readonly literal: T,
     ) { super(); }
 
-    protected _parse(input: unknown, ctx: ParseContext): T {
+    protected _normalize(input: unknown, ctx: ParseContext): T {
         if (input !== this.literal) {
             this.makeIssue({
                 ctx,

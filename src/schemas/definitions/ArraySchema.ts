@@ -6,7 +6,7 @@ export class ArraySchema<T> extends Schema<T[]> {
         private readonly elementSchema: Schema<T>,
     ) { super(); }
 
-    protected _parse(input: unknown, ctx: ParseContext): T[] {
+    protected _normalize(input: unknown, ctx: ParseContext): T[] {
         let array;
         if (Array.isArray(input)) {
             array = input;
@@ -24,7 +24,7 @@ export class ArraySchema<T> extends Schema<T[]> {
 
         return array.map((item, index) => {
             ctx.path.push(index);
-            const result = this.invokeParse(this.elementSchema, item, ctx);
+            const result = this.invokeNormalize(this.elementSchema, item, ctx);
             ctx.path.pop();
 
             return result;

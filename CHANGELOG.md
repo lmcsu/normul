@@ -6,6 +6,8 @@
 
 ### Changed
 
+- `parse` has been renamed to `normalize` to emphasize data shaping and avoid confusion with validation libraries
+
 - The record now accepts two schemas: `record(keySchema, valueSchema)`, or one schema for values: `record(valueSchema)`
 
 

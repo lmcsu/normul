@@ -2,7 +2,7 @@ import type { ParseContext } from '../../types.js';
 import { Schema } from '../Schema.js';
 
 export class StringSchema extends Schema<string> {
-    protected _parse(input: unknown, ctx: ParseContext): string {
+    protected _normalize(input: unknown, ctx: ParseContext): string {
         if (typeof input === 'string') {
             return input;
         }

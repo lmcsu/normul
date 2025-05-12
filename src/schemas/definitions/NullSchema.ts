@@ -2,7 +2,7 @@ import type { ParseContext } from '../../types.js';
 import { Schema } from '../Schema.js';
 
 export class NullSchema extends Schema<null> {
-    protected _parse(input: unknown, ctx: ParseContext): null {
+    protected _normalize(input: unknown, ctx: ParseContext): null {
         if (input === null) {
             return input;
         }

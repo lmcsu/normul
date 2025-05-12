@@ -25,7 +25,7 @@ export class ObjectSchema<T extends Shape> extends Schema<InferShape<T>> {
         private mode: Mode = 'strip',
     ) { super(); }
 
-    protected _parse(input: unknown, ctx: ParseContext): InferShape<T> {
+    protected _normalize(input: unknown, ctx: ParseContext): InferShape<T> {
         if (Object.prototype.toString.call(input) !== '[object Object]') {
             this.makeIssue({
                 ctx,
@@ -42,7 +42,7 @@ export class ObjectSchema<T extends Shape> extends Schema<InferShape<T>> {
 
         for (const key in this.shape) {
             ctx.path.push(key);
-            result[key] = this.invokeParse(this.shape[key]!, object[key], ctx);
+            result[key] = this.invokeNormalize(this.shape[key]!, object[key], ctx);
             ctx.path.pop();
         }
 
@@ -100,9 +100,9 @@ export class ObjectSchema<T extends Shape> extends Schema<InferShape<T>> {
                 super(parent.shape, parent.mode);
             }
 
-            protected _parse(input: unknown, ctx: ParseContext) {
+            protected _normalize(input: unknown, ctx: ParseContext) {
                 const transformed = fn(input);
-                return this.invokeParse(parent, transformed, ctx);
+                return this.invokeNormalize(parent, transformed, ctx);
             }
         })();
     }

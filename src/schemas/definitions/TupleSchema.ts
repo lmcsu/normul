@@ -6,7 +6,7 @@ export class TupleSchema<T extends unknown[]> extends Schema<T> {
         private readonly elementSchemas: { [K in keyof T]: Schema<T[K]> },
     ) { super(); }
 
-    protected _parse(input: unknown, ctx: ParseContext): T {
+    protected _normalize(input: unknown, ctx: ParseContext): T {
         let array: unknown[];
 
         if (Array.isArray(input)) {
@@ -14,7 +14,7 @@ export class TupleSchema<T extends unknown[]> extends Schema<T> {
         } else {
             this.makeIssue({
                 ctx,
-                message: 'Converted to array for tuple parsing',
+                message: 'Converted to array for tuple normalizing',
                 level: 'info',
                 expected: 'array',
                 received: input,
@@ -26,7 +26,7 @@ export class TupleSchema<T extends unknown[]> extends Schema<T> {
 
         for (let i = 0; i < this.elementSchemas.length; i++) {
             ctx.path.push(i);
-            result[i] = this.invokeParse(this.elementSchemas[i]!, array[i], ctx);
+            result[i] = this.invokeNormalize(this.elementSchemas[i]!, array[i], ctx);
             ctx.path.pop();
         }
 

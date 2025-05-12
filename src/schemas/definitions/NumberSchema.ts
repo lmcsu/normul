@@ -2,7 +2,7 @@ import type { ParseContext } from '../../types.js';
 import { Schema } from '../Schema.js';
 
 export class NumberSchema extends Schema<number> {
-    protected _parse(input: unknown, ctx: ParseContext): number {
+    protected _normalize(input: unknown, ctx: ParseContext): number {
         if (typeof input === 'number') {
             return input;
         }

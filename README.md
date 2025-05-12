@@ -44,7 +44,7 @@ const raw = {
   status: 'inactive',
 };
 
-const { data, issues } = user.parse(raw);
+const { data, issues } = user.normalize(raw);
 console.log(data);
 // {
 //   id: 42,
@@ -112,7 +112,7 @@ const input = {
   ],
 };
 
-const { data } = blog.parse(input);
+const { data } = blog.normalize(input);
 console.log(data);
 // {
 //   posts: [

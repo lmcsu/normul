@@ -7,7 +7,7 @@ export class RecordSchema<K extends string | number, V> extends Schema<Record<K,
         private valueSchema: Schema<V>,
     ) { super(); }
 
-    protected _parse(input: unknown, ctx: ParseContext): Record<K, V> {
+    protected _normalize(input: unknown, ctx: ParseContext): Record<K, V> {
         if (Object.prototype.toString.call(input) !== '[object Object]') {
             this.makeIssue({
                 ctx,
@@ -22,11 +22,11 @@ export class RecordSchema<K extends string | number, V> extends Schema<Record<K,
         const result: Record<string | number, V> = {};
         for (const key in object) {
             ctx.path.push('[key]');
-            const parsedKey = this.invokeParse(this.keySchema, key, ctx);
+            const normalizedKey = this.invokeNormalize(this.keySchema, key, ctx);
             ctx.path.pop();
 
-            ctx.path.push(parsedKey);
-            result[parsedKey] = this.invokeParse(this.valueSchema, object[key], ctx);
+            ctx.path.push(normalizedKey);
+            result[normalizedKey] = this.invokeNormalize(this.valueSchema, object[key], ctx);
             ctx.path.pop();
         }
         return result;

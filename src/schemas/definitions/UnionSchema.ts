@@ -15,7 +15,7 @@ export class UnionSchema<T extends [Schema, ...Schema[]]> extends Schema<InferUn
         protected readonly schemas: T,
     ) { super(); }
 
-    protected _parse(input: unknown, ctx: ParseContext): InferUnion<T> {
+    protected _normalize(input: unknown, ctx: ParseContext): InferUnion<T> {
         const find = (input: unknown): Candidate<T> => {
             const candidates: Candidate<T>[] = [];
 
@@ -25,7 +25,7 @@ export class UnionSchema<T extends [Schema, ...Schema[]]> extends Schema<InferUn
                     path: [],
                 };
 
-                const data = this.invokeParse(schema, input, innerCtx) as InferUnion<T>;
+                const data = this.invokeNormalize(schema, input, innerCtx) as InferUnion<T>;
 
                 if (innerCtx.issues.length === 0) {
                     return {
@@ -80,7 +80,7 @@ export class DiscriminatedUnionSchema<T extends [Schema, ...Schema[]]> extends U
         schemas: T,
     ) { super(schemas); }
 
-    protected _parse(input: unknown, ctx: ParseContext): InferUnion<T> {
+    protected _normalize(input: unknown, ctx: ParseContext): InferUnion<T> {
         for (const schema of this.schemas) {
             if (schema instanceof ObjectSchema) {
                 const pickedSchema = schema.pick([this.discriminator]);
@@ -90,17 +90,17 @@ export class DiscriminatedUnionSchema<T extends [Schema, ...Schema[]]> extends U
                     path: [],
                 };
 
-                const data = this.invokeParse(pickedSchema, input, innerCtx);
+                const data = this.invokeNormalize(pickedSchema, input, innerCtx);
 
                 if (
                     innerCtx.issues.length === 0 &&
                     this.discriminator in data
                 ) {
-                    return this.invokeParse(schema, input, ctx) as InferUnion<T>;
+                    return this.invokeNormalize(schema, input, ctx) as InferUnion<T>;
                 }
             }
         }
 
-        return super._parse(input, ctx);
+        return super._normalize(input, ctx);
     }
 }

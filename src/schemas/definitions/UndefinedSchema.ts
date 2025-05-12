@@ -2,7 +2,7 @@ import type { ParseContext } from '../../types.js';
 import { Schema } from '../Schema.js';
 
 export class UndefinedSchema extends Schema<undefined> {
-    protected _parse(input: unknown, ctx: ParseContext): undefined {
+    protected _normalize(input: unknown, ctx: ParseContext): undefined {
         if (input === undefined) {
             return input;
         }
