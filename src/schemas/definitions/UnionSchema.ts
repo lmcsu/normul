@@ -7,10 +7,12 @@ type InferUnion<T extends Schema[]> =
 
 interface Candidate<T extends Schema[]> {
     data: InferUnion<T>;
-    ctx: ParseContext;
+    ctx?: ParseContext;
 }
 
 export class UnionSchema<T extends [Schema, ...Schema[]]> extends Schema<InferUnion<T>> {
+    protected defaultValue: InferUnion<T> | undefined;
+
     constructor(
         protected readonly schemas: T,
     ) { super(); }
@@ -30,7 +32,6 @@ export class UnionSchema<T extends [Schema, ...Schema[]]> extends Schema<InferUn
                 if (innerCtx.issues.length === 0) {
                     return {
                         data,
-                        ctx: innerCtx,
                     };
                 }
 
@@ -40,15 +41,21 @@ export class UnionSchema<T extends [Schema, ...Schema[]]> extends Schema<InferUn
                 });
             }
 
+            if (this.defaultValue !== undefined) {
+                return {
+                    data: this.defaultValue,
+                };
+            }
+
             let maxDepth = 0;
             for (const candidate of candidates) {
-                maxDepth = Math.max(maxDepth, candidate.ctx.path.length);
+                maxDepth = Math.max(maxDepth, candidate.ctx!.path.length);
             }
 
             let remaining = candidates;
             for (let level = 0; level <= maxDepth; level++) {
                 const counts = remaining.map((candidate) => {
-                    return candidate.ctx.issues.filter(issue => issue.path.length === level).length;
+                    return candidate.ctx!.issues.filter(issue => issue.path.length === level).length;
                 });
 
                 const minCount = Math.min(...counts);
@@ -65,12 +72,20 @@ export class UnionSchema<T extends [Schema, ...Schema[]]> extends Schema<InferUn
 
         const candidate = find(input);
 
-        ctx.issues.push(...candidate.ctx.issues.map(issue => ({
-            ...issue,
-            path: [...ctx.path, ...issue.path],
-        })));
+        if (candidate.ctx) {
+            ctx.issues.push(...candidate.ctx.issues.map(issue => ({
+                ...issue,
+                path: [...ctx.path, ...issue.path],
+            })));
+        }
 
         return candidate.data;
+    }
+
+    // I hope I will find a good way to remove this in the future
+    public default(value: InferUnion<T>): this {
+        this.defaultValue = value;
+        return this;
     }
 }
 

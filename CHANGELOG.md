@@ -4,6 +4,8 @@
 
 - Support multiple element schemas in ArraySchema
 
+- Add default fallback for UnionSchema when no variant matches
+
 - Add `.partial` for RecordSchema
 
 ### Changed
