@@ -20,8 +20,10 @@ import {
 
 export const any = new AnySchema();
 
-export function array<T>(schema: Schema<T>): ArraySchema<T> {
-    return new ArraySchema(schema);
+export function array<T extends [Schema, ...Schema[]]>(
+    ...schemas: T
+): ArraySchema<T> {
+    return new ArraySchema(schemas);
 }
 
 export const boolean = new BooleanSchema();

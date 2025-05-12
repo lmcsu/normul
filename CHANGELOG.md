@@ -2,6 +2,8 @@
 
 ### Added
 
+- Support multiple element schemas in ArraySchema
+
 - Add `.partial` for RecordSchema
 
 ### Changed
