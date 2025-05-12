@@ -1,12 +1,13 @@
 import type { ParseContext } from '../../types.js';
 import { Schema } from '../Schema.js';
 
-export class RecordSchema<T> extends Schema<Record<string, T>> {
+export class RecordSchema<K extends string | number, V> extends Schema<Record<K, V>> {
     constructor(
-        private valueSchema: Schema<T>,
+        private keySchema: Schema<K>,
+        private valueSchema: Schema<V>,
     ) { super(); }
 
-    protected _parse(input: unknown, ctx: ParseContext): Record<string, T> {
+    protected _parse(input: unknown, ctx: ParseContext): Record<K, V> {
         if (Object.prototype.toString.call(input) !== '[object Object]') {
             this.makeIssue({
                 ctx,
@@ -17,13 +18,21 @@ export class RecordSchema<T> extends Schema<Record<string, T>> {
             });
         }
 
-        const object: Record<string, unknown> = { ...(input as object) };
-        const result: Record<string, T> = {};
+        const object: Record<string | number, unknown> = { ...(input as object) };
+        const result: Record<string | number, V> = {};
         for (const key in object) {
-            ctx.path.push(key);
-            result[key] = this.invokeParse(this.valueSchema, object[key], ctx);
+            ctx.path.push('[key]');
+            const parsedKey = this.invokeParse(this.keySchema, key, ctx);
+            ctx.path.pop();
+
+            ctx.path.push(parsedKey);
+            result[parsedKey] = this.invokeParse(this.valueSchema, object[key], ctx);
             ctx.path.pop();
         }
         return result;
+    }
+
+    get partial(): Schema<Partial<Record<K, V>>> {
+        return this;
     }
 }

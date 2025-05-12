@@ -1,3 +1,17 @@
+## Unreleased
+
+### Added
+
+- Add `.partial` for RecordSchema
+
+### Changed
+
+- The record now accepts two schemas: `record(keySchema, valueSchema)`, or one schema for values: `record(valueSchema)`
+
+
+---
+
+
 ## v0.2.0 – 2025-05-06
 
 

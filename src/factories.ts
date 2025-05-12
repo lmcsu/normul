@@ -45,8 +45,15 @@ export function object<T extends Shape>(shape: T): ObjectSchema<T> {
     return new ObjectSchema(shape);
 }
 
-export function record<V>(schema: Schema<V>): RecordSchema<V> {
-    return new RecordSchema(schema);
+export function record<V>(valueSchema: Schema<V>): RecordSchema<string, V>;
+export function record<K extends string | number, V>(keySchema: Schema<K>, valueSchema: Schema<V>): RecordSchema<K, V>;
+export function record<K extends string | number, V>(
+    keyOrValue: Schema<K> | Schema<V>,
+    valueMaybe?: Schema<V>,
+): RecordSchema<K, V> | RecordSchema<string, V> {
+    return valueMaybe ?
+        new RecordSchema(keyOrValue as Schema<K>, valueMaybe) :
+        new RecordSchema(new StringSchema(), keyOrValue as Schema<V>);
 }
 
 export const string = new StringSchema();
