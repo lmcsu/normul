@@ -16,6 +16,13 @@ export class BooleanSchema extends Schema<boolean> {
         });
 
         const string = String(input).trim().toLowerCase();
-        return (string === 'true') || !!(Number(string));
+        if (['false', '0', 'no'].includes(string)) {
+            return false;
+        }
+        if (['true', '1', 'yes'].includes(string)) {
+            return true;
+        }
+
+        return !!input;
     }
 }

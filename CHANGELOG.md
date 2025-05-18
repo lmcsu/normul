@@ -1,3 +1,14 @@
+## Unreleased
+
+
+### Changed
+
+- Improve BooleanSchema normalization logic
+
+
+---
+
+
 ## v0.3.0 – 2025-05-12
 
 
