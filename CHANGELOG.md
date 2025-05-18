@@ -3,7 +3,7 @@
 
 ### Changed
 
-- Improve BooleanSchema normalization logic
+- Improve BooleanSchema and NumberSchema normalization logic
 
 
 ---
