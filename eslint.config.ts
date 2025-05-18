@@ -36,7 +36,11 @@ export default [
         },
     },
     {
-        files: ['./*.js', './*.ts'],
+        files: [
+            './*.js',
+            './*.ts',
+            './test/**/*.ts',
+        ],
         languageOptions: {
             globals: {
                 ...globals.node,
@@ -69,6 +73,7 @@ export default [
             'unicorn/no-this-assignment': ['off'],
             'unicorn/prevent-abbreviations': ['off'],
             'unicorn/relative-url-style': ['error', 'always'],
+            'unicorn/no-useless-undefined': ['off'],
         },
     },
 ] satisfies (Linter.Config | ReturnType<(typeof ts)['config']>[number])[];

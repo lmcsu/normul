@@ -19,6 +19,7 @@
         "dev": "run-s clear dev:lib",
         "dev:lib": "pnpm --silent build:lib --watch",
         "lint": "eslint .",
+        "test": "vitest run",
         "type-check": "run-p --silent type-check:node type-check:lib",
         "type-check:lib": "tsc -p tsconfig.lib.json",
         "type-check:node": "tsc -p tsconfig.node.json"
@@ -57,6 +58,7 @@
         "npm-run-all2": "^8.0.1",
         "rimraf": "^6.0.1",
         "typescript": "^5.8.3",
-        "typescript-eslint": "^8.31.1"
+        "typescript-eslint": "^8.31.1",
+        "vitest": "^3.1.3"
     }
 }
