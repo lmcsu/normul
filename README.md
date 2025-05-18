@@ -67,7 +67,8 @@ console.log(issues); // [{ message: 'Normalized literal', ... }]
 - `n.literal(value)` — always returns the fixed value
 - `n.array(schema)` — array of normalized items (wraps non-arrays)
 - `n.object({...})` — object with normalized fields
-- `n.record(schema)` — object with arbitrary keys, values normalized
+- `n.record(valueSchema)` — object with arbitrary keys, values normalized
+- `n.record(keySchema, valueSchema)` — object with normalized keys and values (both schemas)
 - `n.union(a, b, ...)` — tries schemas in order, picks the first that fits
 - `n.tuple(a, b, ...)` — fixed-length arrays
 - `n.discriminatedUnion(discriminator, ...schemas)` — smart union by field
@@ -78,7 +79,7 @@ console.log(issues); // [{ message: 'Normalized literal', ... }]
 ---
 
 ## Power-Ups (chaining methods)
-- `.default(value)` — fallback if value is null/undefined
+- `.default(value)` — fallback if value is null/undefined **or** if a union doesn't match any schema
 - `.optional` — allow undefined
 - `.nullable` — allow null
 - `.preprocess(fn)` — run custom logic before normalization
@@ -87,41 +88,7 @@ console.log(issues); // [{ message: 'Normalized literal', ... }]
 - `.extend({...})` (for objects) — add fields
 - `.pick([...])` (for objects) — select fields
 - `.omit([...])` (for objects) — exclude fields
-
----
-
-## Real-World Example: Nested, Defaults, and More
-```ts
-import * as n from 'normul';
-
-const post = n.object({
-  title: n.string,
-  views: n.number.default(0),
-  tags: n.array(n.string).default([]),
-});
-
-const blog = n.object({
-  posts: n.array(post),
-  author: n.string.optional,
-});
-
-const input = {
-  posts: [
-    { title: 'Hello', views: '10' },
-    { title: 123 },
-  ],
-};
-
-const { data } = blog.normalize(input);
-console.log(data);
-// {
-//   posts: [
-//     { title: 'Hello', views: 10, tags: [] },
-//     { title: '123', views: 0, tags: [] }
-//   ],
-//   author: undefined
-// }
-```
+- `.partial` (for records) — makes all fields optional
 
 ---
 
