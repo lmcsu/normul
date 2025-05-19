@@ -10,7 +10,7 @@ export class NullSchema extends Schema<null> {
         this.makeIssue({
             ctx,
             message: 'Converted to null',
-            level: 'info',
+            level: 'warn',
             expected: 'null',
             received: input,
         });

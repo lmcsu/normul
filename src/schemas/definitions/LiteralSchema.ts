@@ -10,8 +10,8 @@ export class LiteralSchema<T extends string | number | boolean | null | undefine
         if (input !== this.literal) {
             this.makeIssue({
                 ctx,
-                message: 'Normalized literal',
-                level: 'info',
+                message: 'Converted to literal',
+                level: 'warn',
                 expected: this.literal,
                 received: input,
             });

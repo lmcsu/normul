@@ -13,7 +13,7 @@ export type Infer<T extends Schema> =
 export interface Issue {
     path: (string | number)[];
     message: string;
-    level: 'info' | 'error';
+    level: 'info' | 'warn' | 'error';
     expected?: string | number | boolean | undefined | null;
     received?: unknown;
 }

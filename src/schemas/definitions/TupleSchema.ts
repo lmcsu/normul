@@ -14,8 +14,8 @@ export class TupleSchema<T extends unknown[]> extends Schema<T> {
         } else {
             this.makeIssue({
                 ctx,
-                message: 'Converted to array for tuple normalizing',
-                level: 'info',
+                message: 'Converted to array',
+                level: 'warn',
                 expected: 'array',
                 received: input,
             });

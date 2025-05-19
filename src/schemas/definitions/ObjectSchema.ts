@@ -30,7 +30,7 @@ export class ObjectSchema<T extends Shape> extends Schema<InferShape<T>> {
             this.makeIssue({
                 ctx,
                 message: 'Converted to object',
-                level: 'info',
+                level: 'warn',
                 expected: 'object',
                 received: input,
             });

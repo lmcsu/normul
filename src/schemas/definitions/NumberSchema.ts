@@ -22,7 +22,7 @@ export class NumberSchema extends Schema<number> {
             this.makeIssue({
                 ctx,
                 message: 'Converted to 0',
-                level: 'info',
+                level: 'warn',
                 expected: 'number',
                 received: input,
             });
@@ -32,7 +32,7 @@ export class NumberSchema extends Schema<number> {
             this.makeIssue({
                 ctx,
                 message: 'Converted to number',
-                level: 'info',
+                level: 'warn',
                 expected: 'number',
                 received: input,
             });

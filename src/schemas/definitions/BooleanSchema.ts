@@ -10,7 +10,7 @@ export class BooleanSchema extends Schema<boolean> {
         this.makeIssue({
             ctx,
             message: 'Converted to boolean',
-            level: 'info',
+            level: 'warn',
             expected: 'boolean',
             received: input,
         });

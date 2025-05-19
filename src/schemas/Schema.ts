@@ -3,14 +3,15 @@ import type { Issue, ParseContext, ParseResult } from '../types.js';
 const ISSUE_LEVELS = {
     none: 0,
     error: 1,
-    info: 2,
+    warn: 2,
+    info: 3,
 } as const satisfies Record<'none' | Issue['level'], number>;
 
 export abstract class Schema<T = unknown> {
     normalize(input: unknown, options?: {
         issueLevel: keyof typeof ISSUE_LEVELS;
     }): ParseResult<T> {
-        const { issueLevel = 'info' } = options ?? {};
+        const { issueLevel = 'warn' } = options ?? {};
 
         const ctx: ParseContext = {
             path: [],
@@ -82,6 +83,12 @@ export class DefaultSchema<T> extends Schema<T> {
 
     protected _normalize(input: unknown, ctx: ParseContext): T {
         if (input === undefined || input === null) {
+            this.makeIssue({
+                ctx,
+                message: 'Using default value',
+                level: 'info',
+            });
+
             return this.defaultValue;
         }
         return this.invokeNormalize(this.inner, input, ctx);
@@ -129,7 +136,7 @@ export class PreprocessSchema<T> extends Schema<T> {
 
             this.makeIssue({
                 ctx,
-                message: `Caught exception in "pre": ${error}`,
+                message: `Caught exception in preprocess: ${error}`,
                 level: 'error',
             });
         }
@@ -154,7 +161,7 @@ export class TransformSchema<T, U> extends Schema<U> {
 
             this.makeIssue({
                 ctx,
-                message: `Caught exception in "post": ${error}`,
+                message: `Caught exception in transform: ${error}`,
                 level: 'error',
             });
             return data as unknown as U;

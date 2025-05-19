@@ -10,7 +10,7 @@ export class UndefinedSchema extends Schema<undefined> {
         this.makeIssue({
             ctx,
             message: 'Converted to undefined',
-            level: 'info',
+            level: 'warn',
             expected: 'undefined',
             received: input,
         });

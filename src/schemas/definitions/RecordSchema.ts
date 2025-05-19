@@ -12,7 +12,7 @@ export class RecordSchema<K extends string | number, V> extends Schema<Record<K,
             this.makeIssue({
                 ctx,
                 message: 'Converted to object',
-                level: 'info',
+                level: 'warn',
                 expected: 'object',
                 received: input,
             });

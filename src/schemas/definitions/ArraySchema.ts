@@ -24,7 +24,7 @@ export class ArraySchema<T extends [Schema, ...Schema[]]> extends Schema<InferAr
             this.makeIssue({
                 ctx,
                 message: 'Converted to array',
-                level: 'info',
+                level: 'warn',
                 expected: 'array',
                 received: input,
             });

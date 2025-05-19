@@ -29,7 +29,7 @@ export class UnionSchema<T extends [Schema, ...Schema[]]> extends Schema<InferUn
 
                 const data = this.invokeNormalize(schema, input, innerCtx) as InferUnion<T>;
 
-                if (innerCtx.issues.length === 0) {
+                if (innerCtx.issues.filter(issue => issue.level !== 'info').length === 0) {
                     return {
                         data,
                     };
@@ -55,7 +55,12 @@ export class UnionSchema<T extends [Schema, ...Schema[]]> extends Schema<InferUn
             let remaining = candidates;
             for (let level = 0; level <= maxDepth; level++) {
                 const counts = remaining.map((candidate) => {
-                    return candidate.ctx!.issues.filter(issue => issue.path.length === level).length;
+                    return candidate.ctx!.issues.filter((issue) => {
+                        return (
+                            issue.level !== 'info' &&
+                            issue.path.length === level
+                        );
+                    }).length;
                 });
 
                 const minCount = Math.min(...counts);
@@ -63,9 +68,21 @@ export class UnionSchema<T extends [Schema, ...Schema[]]> extends Schema<InferUn
                 remaining = remaining.filter((_, i) => counts[i] === minCount);
 
                 if (remaining.length === 1) {
+                    this.makeIssue({
+                        ctx,
+                        message: 'Found the most suitable schema in union',
+                        level: 'info',
+                    });
+
                     return remaining[0]!;
                 }
             }
+
+            this.makeIssue({
+                ctx,
+                message: 'Multiple most suitable schemas found in union, taking the first one',
+                level: 'warn',
+            });
 
             return remaining[0]!;
         };
@@ -105,16 +122,19 @@ export class DiscriminatedUnionSchema<T extends [Schema, ...Schema[]]> extends U
                     path: [],
                 };
 
-                const data = this.invokeNormalize(pickedSchema, input, innerCtx);
+                this.invokeNormalize(pickedSchema, input, innerCtx);
 
-                if (
-                    innerCtx.issues.length === 0 &&
-                    this.discriminator in data
-                ) {
+                if (innerCtx.issues.filter(issue => issue.level !== 'info').length === 0) {
                     return this.invokeNormalize(schema, input, ctx) as InferUnion<T>;
                 }
             }
         }
+
+        this.makeIssue({
+            ctx,
+            message: 'No matching schema found in discriminated union, falling back to regular union',
+            level: 'warn',
+        });
 
         return super._normalize(input, ctx);
     }

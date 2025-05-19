@@ -10,7 +10,7 @@ export class StringSchema extends Schema<string> {
         this.makeIssue({
             ctx,
             message: 'Converted to string',
-            level: 'info',
+            level: 'warn',
             expected: 'string',
             received: input,
         });
