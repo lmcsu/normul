@@ -17,6 +17,8 @@ export type InferShape<S extends Shape> = Simplify<
     }
 >;
 
+export type ExtractShape<T> = T extends ObjectSchema<infer U> ? U : never;
+
 type Mode = 'strip' | 'passthrough';
 
 export class ObjectSchema<T extends Shape> extends Schema<InferShape<T>> {

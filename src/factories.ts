@@ -15,6 +15,7 @@ import {
     UndefinedSchema,
     UnionSchema,
     UnknownSchema,
+    type ExtractShape,
     type Shape,
 } from './schemas/index.js';
 
@@ -28,10 +29,13 @@ export function array<T extends [Schema, ...Schema[]]>(
 
 export const boolean = new BooleanSchema();
 
-export function discriminatedUnion<T extends [Schema, ...Schema[]]>(
-    discriminator: string,
+export function discriminatedUnion<
+    T extends [ObjectSchema<Shape>, ...ObjectSchema<Shape>[]],
+    D extends Extract<keyof ExtractShape<T[number]>, string>,
+>(
+    discriminator: D,
     ...schemas: T
-): DiscriminatedUnionSchema<T> {
+): DiscriminatedUnionSchema<T, D> {
     return new DiscriminatedUnionSchema(discriminator, schemas);
 }
 

@@ -2,6 +2,8 @@
 
 - Introduce fallback method and FallbackSchema
 
+- Enhance DiscriminatedUnionSchema types
+
 - Add "warn" issue level and update issue messages
 
 ---
