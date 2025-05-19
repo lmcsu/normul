@@ -73,6 +73,10 @@ export abstract class Schema<T = unknown> {
     type<T>(): Schema<T> {
         return new TypeSchema<T>();
     }
+
+    fallback(value: T): Schema<T> {
+        return new FallbackSchema(this, value);
+    }
 }
 
 export class DefaultSchema<T> extends Schema<T> {
@@ -172,5 +176,41 @@ export class TransformSchema<T, U> extends Schema<U> {
 export class TypeSchema<T> extends Schema<T> {
     protected _normalize(input: unknown): T {
         return input as T;
+    }
+}
+
+export class FallbackSchema<T> extends Schema<T> {
+    constructor(
+        private readonly inner: Schema<T>,
+        private readonly fallbackValue: T,
+    ) { super(); }
+
+    protected _normalize(input: unknown, ctx: ParseContext): T {
+        const innerCtx: ParseContext = {
+            issues: [],
+            path: [],
+        };
+
+        const data = this.invokeNormalize(this.inner, input, innerCtx);
+
+        ctx.issues.push(...innerCtx.issues);
+
+        const shouldFallback = innerCtx.issues.some((issue) => {
+            return (
+                issue.level !== 'info' &&
+                issue.path.length === 0
+            );
+        });
+
+        if (shouldFallback) {
+            this.makeIssue({
+                ctx,
+                message: 'Using fallback value',
+                level: 'info',
+            });
+            return this.fallbackValue;
+        }
+
+        return data;
     }
 }

@@ -1,6 +1,10 @@
 ## Unreleased
 
 
+### Added
+
+- Introduce fallback method and FallbackSchema
+
 ### Changed
 
 - Add "warn" issue level and update issue messages

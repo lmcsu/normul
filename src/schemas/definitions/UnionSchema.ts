@@ -11,8 +11,6 @@ interface Candidate<T extends Schema[]> {
 }
 
 export class UnionSchema<T extends [Schema, ...Schema[]]> extends Schema<InferUnion<T>> {
-    protected defaultValue: InferUnion<T> | undefined;
-
     constructor(
         protected readonly schemas: T,
     ) { super(); }
@@ -39,12 +37,6 @@ export class UnionSchema<T extends [Schema, ...Schema[]]> extends Schema<InferUn
                     data,
                     ctx: innerCtx,
                 });
-            }
-
-            if (this.defaultValue !== undefined) {
-                return {
-                    data: this.defaultValue,
-                };
             }
 
             let maxDepth = 0;
@@ -97,12 +89,6 @@ export class UnionSchema<T extends [Schema, ...Schema[]]> extends Schema<InferUn
         }
 
         return candidate.data;
-    }
-
-    // I hope I will find a good way to remove this in the future
-    public default(value: InferUnion<T>): this {
-        this.defaultValue = value;
-        return this;
     }
 }
 

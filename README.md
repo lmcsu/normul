@@ -79,11 +79,12 @@ console.log(issues); // [{ message: 'Normalized literal', ... }]
 ---
 
 ## Power-Ups (chaining methods)
-- `.default(value)` — fallback if value is null/undefined **or** if a union doesn't match any schema
+- `.default(value)` — fallback if value is null/undefined
 - `.optional` — allow undefined
 - `.nullable` — allow null
 - `.preprocess(fn)` — run custom logic before normalization
 - `.transform(fn)` — run custom logic after normalization
+- `.fallback(value)` — use fallback if normalization produces issues
 - `.strip` / `.passthrough` (for objects) — control extra keys
 - `.extend({...})` (for objects) — add fields
 - `.pick([...])` (for objects) — select fields

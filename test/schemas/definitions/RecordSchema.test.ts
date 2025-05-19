@@ -9,7 +9,7 @@ const keyValueSchema = n.record(
     n.union(
         n.literal('foo'),
         n.literal('bar'),
-    ).default('bar'),
+    ),
     n.number,
 );
 
@@ -26,7 +26,7 @@ describe('RecordSchema', () => {
 
     it('should convert non-object to object', () => {
         const result = keyValueSchema.normalize('baz');
-        expect(result.data).toEqual({ bar: 0 });
+        expect(result.data).toEqual({ foo: 0 });
     });
 });
 
