@@ -67,7 +67,8 @@ export class ObjectSchema<T extends Shape> extends Schema<InferShape<T>> {
         return new ObjectSchema(this.shape, 'passthrough');
     }
 
-    extend<U extends Shape>(newShape: U): ObjectSchema<T & U> {
+    extend<U extends Shape>(schemaOrShape: U | ObjectSchema<U>): ObjectSchema<T & U> {
+        const newShape = schemaOrShape instanceof ObjectSchema ? schemaOrShape.shape : schemaOrShape;
         return new ObjectSchema(
             { ...this.shape, ...newShape },
             this.mode,
