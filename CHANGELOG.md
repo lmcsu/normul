@@ -1,4 +1,4 @@
-## Unreleased
+## v0.6.0 – 2025-05-26
 
 - Refactor schema modifiers system to apply modifications directly on schema instances
 
