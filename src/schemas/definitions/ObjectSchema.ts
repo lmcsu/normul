@@ -6,26 +6,23 @@ export type Shape = Record<string, Schema>;
 
 export type InferShape<S extends Shape> = Simplify<
     {
-        [K in keyof S as undefined extends (S[K] extends Schema<infer U> ? U : never)
-            ? K
-            : never]?: Exclude<S[K] extends Schema<infer U> ? U : never, undefined>
+        [K in keyof S as undefined extends (S[K] extends Schema<infer U> ? U : never) ? K : never]?:
+        Exclude<S[K] extends Schema<infer U> ? U : never, undefined>
     }
     &
     {
-        [K in keyof S as undefined extends (S[K] extends Schema<infer U> ? U : never)
-            ? never
-            : K]: S[K] extends Schema<infer U> ? U : never
+        [K in keyof S as undefined extends (S[K] extends Schema<infer U> ? U : never) ? never : K]:
+        S[K] extends Schema<infer U> ? U : never
     }
 >;
 
 export type ExtractShape<T> = T extends ObjectSchema<infer U> ? U : never;
 
-type Mode = 'strip' | 'passthrough';
-
 export class ObjectSchema<T extends Shape> extends Schema<InferShape<T>> {
+    protected mode: 'strip' | 'passthrough' = 'strip';
+
     constructor(
-        private shape: T,
-        private mode: Mode = 'strip',
+        protected shape: T,
     ) { super(); }
 
     protected _normalize(input: unknown, ctx: ParseContext): InferShape<T> {
@@ -60,20 +57,25 @@ export class ObjectSchema<T extends Shape> extends Schema<InferShape<T>> {
         return result as InferShape<T>;
     }
 
-    get strip(): ObjectSchema<T> {
-        return new ObjectSchema(this.shape, 'strip');
+    get strip(): this {
+        const result = this.clone();
+        result.mode = 'strip';
+        return result;
     }
 
-    get passthrough(): ObjectSchema<T> {
-        return new ObjectSchema(this.shape, 'passthrough');
+    get passthrough(): this {
+        const result = this.clone();
+        result.mode = 'passthrough';
+        return result;
     }
 
     extend<U extends Shape>(schemaOrShape: U | ObjectSchema<U>): ObjectSchema<T & U> {
-        const newShape = schemaOrShape instanceof ObjectSchema ? schemaOrShape.shape : schemaOrShape;
-        return new ObjectSchema(
-            { ...this.shape, ...newShape },
-            this.mode,
-        );
+        const result = this.clone() as unknown as ObjectSchema<T & U>;
+        result.shape = {
+            ...result.shape,
+            ...(schemaOrShape instanceof ObjectSchema ? schemaOrShape.shape : schemaOrShape),
+        };
+        return result;
     }
 
     pick<K extends keyof T>(keys: K[]): ObjectSchema<Pick<T, K>> {
@@ -83,7 +85,9 @@ export class ObjectSchema<T extends Shape> extends Schema<InferShape<T>> {
                 pickedShape[key] = this.shape[key];
             }
         }
-        return new ObjectSchema(pickedShape as Pick<T, K>, this.mode);
+        const result = this.clone() as unknown as ObjectSchema<Pick<T, K>>;
+        result.shape = pickedShape as Pick<T, K>;
+        return result;
     }
 
     omit<K extends keyof T>(keys: K[]): ObjectSchema<Omit<T, K>> {
@@ -93,21 +97,16 @@ export class ObjectSchema<T extends Shape> extends Schema<InferShape<T>> {
                 delete omittedShape[key];
             }
         }
-        return new ObjectSchema(omittedShape as Omit<T, K>, this.mode);
+        const result = this.clone() as unknown as ObjectSchema<Omit<T, K>>;
+        result.shape = omittedShape as Omit<T, K>;
+        return result;
     }
 
-    override preprocess(fn: (input: unknown) => unknown): ObjectSchema<T> {
-        const parent = this;
+    protected override cloneArgs() {
+        return [this.shape];
+    }
 
-        return new (class extends ObjectSchema<T> {
-            constructor() {
-                super(parent.shape, parent.mode);
-            }
-
-            protected _normalize(input: unknown, ctx: ParseContext) {
-                const transformed = fn(input);
-                return this.invokeNormalize(parent, transformed, ctx);
-            }
-        })();
+    protected override cloneProps(target: this) {
+        target.mode = this.mode;
     }
 }

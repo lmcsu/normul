@@ -90,6 +90,10 @@ export class UnionSchema<T extends [Schema, ...Schema[]]> extends Schema<InferUn
 
         return candidate.data;
     }
+
+    protected override cloneArgs(): unknown[] {
+        return [this.schemas];
+    }
 }
 
 export class DiscriminatedUnionSchema<
@@ -98,7 +102,7 @@ export class DiscriminatedUnionSchema<
 > extends UnionSchema<T> {
     constructor(
         protected readonly discriminator: D,
-        schemas: T,
+        protected readonly schemas: T,
     ) { super(schemas); }
 
     protected _normalize(input: unknown, ctx: ParseContext): InferUnion<T> {
@@ -126,5 +130,9 @@ export class DiscriminatedUnionSchema<
         });
 
         return super._normalize(input, ctx);
+    }
+
+    protected override cloneArgs(): unknown[] {
+        return [this.discriminator, this.schemas];
     }
 }

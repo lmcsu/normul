@@ -4,7 +4,7 @@ import { Schema } from '../Schema.js';
 
 export class TupleSchema<T extends unknown[]> extends Schema<T> {
     constructor(
-        private readonly elementSchemas: { [K in keyof T]: Schema<T[K]> },
+        protected readonly elementSchemas: { [K in keyof T]: Schema<T[K]> },
     ) { super(); }
 
     protected _normalize(input: unknown, ctx: ParseContext): T {
@@ -32,5 +32,9 @@ export class TupleSchema<T extends unknown[]> extends Schema<T> {
         }
 
         return result as T;
+    }
+
+    protected override cloneArgs(): unknown[] {
+        return [this.elementSchemas];
     }
 }

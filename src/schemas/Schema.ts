@@ -8,6 +8,12 @@ const ISSUE_LEVELS = {
 } as const satisfies Record<'none' | Issue['level'], number>;
 
 export abstract class Schema<T = unknown> {
+    protected modifiers: ((
+        input: unknown,
+        ctx: ParseContext,
+        next: (input: unknown, ctx: ParseContext) => unknown,
+    ) => unknown)[] = [];
+
     normalize(input: unknown, options?: {
         issueLevel: keyof typeof ISSUE_LEVELS;
     }): ParseResult<T> {
@@ -17,7 +23,8 @@ export abstract class Schema<T = unknown> {
             path: [],
             issues: [],
         };
-        const data = this._normalize(input, ctx);
+
+        const data = this.invokeNormalize(this, input, ctx);
 
         let issues: Issue[] = [];
         const issueLevelThreshold = ISSUE_LEVELS[issueLevel];
@@ -36,7 +43,15 @@ export abstract class Schema<T = unknown> {
     protected abstract _normalize(input: unknown, ctx: ParseContext): T;
 
     protected invokeNormalize<U>(schema: Schema<U>, input: unknown, ctx: ParseContext): U {
-        return schema._normalize(input, ctx);
+        let currentModifierIndex = schema.modifiers.length - 1;
+        const next = (input: unknown, ctx: ParseContext): unknown => {
+            if (currentModifierIndex >= 0) {
+                const fn = schema.modifiers[currentModifierIndex--]!;
+                return fn(input, ctx, next);
+            }
+            return schema._normalize(input, ctx);
+        };
+        return next(input, ctx) as U;
     }
 
     protected makeIssue(options: {
@@ -51,166 +66,156 @@ export abstract class Schema<T = unknown> {
     }
 
     get optional(): Schema<T | undefined> {
-        return new OptionalSchema(this);
+        const result = this.clone();
+
+        result.modifiers.push((input, ctx, next) => {
+            if (input === undefined) {
+                return undefined;
+            }
+            return next(input, ctx);
+        });
+
+        return result as Schema<T | undefined>;
     }
 
     get nullable(): Schema<T | null> {
-        return new NullableSchema(this);
+        const result = this.clone();
+
+        result.modifiers.push((input, ctx, next) => {
+            if (input === null) {
+                return null;
+            }
+            return next(input, ctx);
+        });
+
+        return result as Schema<T | null>;
     }
 
-    default(value: T): Schema<T> {
-        return new DefaultSchema(this, value);
+    default(value: T): this {
+        const result = this.clone();
+
+        result.modifiers.push((input, ctx, next) => {
+            if (input === undefined || input === null) {
+                this.makeIssue({
+                    ctx,
+                    message: 'Using default value',
+                    level: 'info',
+                });
+                return value;
+            }
+            return next(input, ctx);
+        });
+
+        return result;
     }
 
-    preprocess(fn: (input: unknown) => unknown): Schema<T> {
-        return new PreprocessSchema(this, fn);
+    preprocess(fn: (input: unknown) => unknown): this {
+        const result = this.clone();
+
+        result.modifiers.push((input, ctx, next) => {
+            let data = input;
+            try {
+                data = fn(input);
+            } catch (error) {
+                console.error(error);
+
+                this.makeIssue({
+                    ctx,
+                    message: `Caught exception in preprocess: ${error}`,
+                    level: 'error',
+                });
+            }
+            return next(data, ctx);
+        });
+
+        return result;
     }
 
     transform<U>(fn: (value: T) => U): Schema<U> {
-        return new TransformSchema(this, fn);
+        const result = this.clone();
+
+        result.modifiers.push((input, ctx, next) => {
+            const data = next(input, ctx) as T;
+
+            try {
+                return fn(data);
+            } catch (error) {
+                console.error(error);
+
+                this.makeIssue({
+                    ctx,
+                    message: `Caught exception in transform: ${error}`,
+                    level: 'error',
+                });
+                return data as unknown as U;
+            }
+        });
+
+        return result as unknown as Schema<U>;
     }
 
     type<T>(): Schema<T> {
         return new TypeSchema<T>();
     }
 
-    fallback(value: T): Schema<T> {
-        return new FallbackSchema(this, value);
-    }
-}
+    fallback(value: T): this {
+        const result = this.clone();
 
-export class DefaultSchema<T> extends Schema<T> {
-    constructor(
-        private inner: Schema<T>,
-        private defaultValue: T,
-    ) { super(); }
+        result.modifiers.push((input, ctx, next) => {
+            const innerCtx: ParseContext = {
+                issues: [],
+                path: [],
+            };
 
-    protected _normalize(input: unknown, ctx: ParseContext): T {
-        if (input === undefined || input === null) {
-            this.makeIssue({
-                ctx,
-                message: 'Using default value',
-                level: 'info',
+            const data = next(input, innerCtx);
+
+            ctx.issues.push(...innerCtx.issues);
+
+            const shouldFallback = innerCtx.issues.some((issue) => {
+                return (
+                    issue.level !== 'info' &&
+                    issue.path.length === 0
+                );
             });
 
-            return this.defaultValue;
-        }
-        return this.invokeNormalize(this.inner, input, ctx);
+            if (shouldFallback) {
+                this.makeIssue({
+                    ctx,
+                    message: 'Using fallback value',
+                    level: 'info',
+                });
+                return value;
+            }
+
+            return data;
+        });
+
+        return result;
     }
-}
 
-export class NullableSchema<T> extends Schema<T | null> {
-    constructor(
-        private inner: Schema<T>,
-    ) { super(); }
+    protected clone(): this {
+        const Constructor = this.constructor as new (...args: unknown[]) => this;
+        const result = new Constructor(...this.cloneArgs());
 
-    protected _normalize(input: unknown, ctx: ParseContext): T | null {
-        if (input === null) {
-            return null;
-        }
-        return this.invokeNormalize(this.inner, input, ctx);
+        result.modifiers = [...this.modifiers];
+
+        this.cloneProps(result);
+
+        return result;
     }
-}
 
-export class OptionalSchema<T> extends Schema<T | undefined> {
-    constructor(
-        private inner: Schema<T>,
-    ) { super(); }
-
-    protected _normalize(input: unknown, ctx: ParseContext): T | undefined {
-        if (input === undefined) {
-            return undefined;
-        }
-        return this.invokeNormalize(this.inner, input, ctx);
+    protected cloneArgs(): unknown[] {
+        return [];
     }
-}
 
-export class PreprocessSchema<T> extends Schema<T> {
-    constructor(
-        private inner: Schema<T>,
-        private fn: (input: unknown) => unknown,
-    ) { super(); }
-
-    protected _normalize(input: unknown, ctx: ParseContext): T {
-        let prep = input;
-        try {
-            prep = this.fn(input);
-        } catch (error) {
-            console.error(error);
-
-            this.makeIssue({
-                ctx,
-                message: `Caught exception in preprocess: ${error}`,
-                level: 'error',
-            });
-        }
-
-        return this.invokeNormalize(this.inner, prep, ctx);
-    }
-}
-
-export class TransformSchema<T, U> extends Schema<U> {
-    constructor(
-        private inner: Schema<T>,
-        private fn: (input: T) => U,
-    ) { super(); }
-
-    protected _normalize(input: unknown, ctx: ParseContext): U {
-        const data = this.invokeNormalize(this.inner, input, ctx);
-
-        try {
-            return this.fn(data);
-        } catch (error) {
-            console.error(error);
-
-            this.makeIssue({
-                ctx,
-                message: `Caught exception in transform: ${error}`,
-                level: 'error',
-            });
-            return data as unknown as U;
-        }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    protected cloneProps(target: this): void {
+        //
     }
 }
 
 export class TypeSchema<T> extends Schema<T> {
     protected _normalize(input: unknown): T {
         return input as T;
-    }
-}
-
-export class FallbackSchema<T> extends Schema<T> {
-    constructor(
-        private readonly inner: Schema<T>,
-        private readonly fallbackValue: T,
-    ) { super(); }
-
-    protected _normalize(input: unknown, ctx: ParseContext): T {
-        const innerCtx: ParseContext = {
-            issues: [],
-            path: [],
-        };
-
-        const data = this.invokeNormalize(this.inner, input, innerCtx);
-
-        ctx.issues.push(...innerCtx.issues);
-
-        const shouldFallback = innerCtx.issues.some((issue) => {
-            return (
-                issue.level !== 'info' &&
-                issue.path.length === 0
-            );
-        });
-
-        if (shouldFallback) {
-            this.makeIssue({
-                ctx,
-                message: 'Using fallback value',
-                level: 'info',
-            });
-            return this.fallbackValue;
-        }
-
-        return data;
     }
 }

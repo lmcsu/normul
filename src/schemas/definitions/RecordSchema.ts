@@ -4,8 +4,8 @@ import { Schema } from '../Schema.js';
 
 export class RecordSchema<K extends string | number, V> extends Schema<Record<K, V>> {
     constructor(
-        private keySchema: Schema<K>,
-        private valueSchema: Schema<V>,
+        protected readonly keySchema: Schema<K>,
+        protected readonly valueSchema: Schema<V>,
     ) { super(); }
 
     protected _normalize(input: unknown, ctx: ParseContext): Record<K, V> {
@@ -35,5 +35,9 @@ export class RecordSchema<K extends string | number, V> extends Schema<Record<K,
 
     get partial(): Schema<Partial<Record<K, V>>> {
         return this;
+    }
+
+    protected override cloneArgs(): unknown[] {
+        return [this.keySchema, this.valueSchema];
     }
 }

@@ -1,5 +1,7 @@
 ## Unreleased
 
+- Refactor schema modifiers system to apply modifications directly on schema instances
+
 - Add helper functions `isObject`, `isArray`, `isString`, `isNumber`, `isBoolean`
 
 ---

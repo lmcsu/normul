@@ -14,7 +14,7 @@ export type InferArray<T extends [Schema, ...Schema[]]> =
 
 export class ArraySchema<T extends [Schema, ...Schema[]]> extends Schema<InferArray<T>> {
     constructor(
-        private readonly elementSchemas: T,
+        protected readonly elementSchemas: T,
     ) { super(); }
 
     protected _normalize(input: unknown, ctx: ParseContext): InferArray<T> {
@@ -47,5 +47,9 @@ export class ArraySchema<T extends [Schema, ...Schema[]]> extends Schema<InferAr
 
             return result;
         }) as InferArray<T>;
+    }
+
+    protected override cloneArgs() {
+        return [this.elementSchemas];
     }
 }

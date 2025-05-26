@@ -3,7 +3,7 @@ import { Schema } from '../Schema.js';
 
 export class LiteralSchema<T extends string | number | boolean | null | undefined> extends Schema<T> {
     constructor(
-        private readonly literal: T,
+        protected readonly literal: T,
     ) { super(); }
 
     protected _normalize(input: unknown, ctx: ParseContext): T {
@@ -18,5 +18,9 @@ export class LiteralSchema<T extends string | number | boolean | null | undefine
         }
 
         return this.literal;
+    }
+
+    protected override cloneArgs() {
+        return [this.literal];
     }
 }
