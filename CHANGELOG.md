@@ -4,6 +4,8 @@
 
 - Add helper functions `isObject`, `isArray`, `isString`, `isNumber`, `isBoolean`
 
+- Improve typed schemas
+
 ---
 
 ## v0.5.0 – 2025-05-19

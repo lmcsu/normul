@@ -154,8 +154,16 @@ export abstract class Schema<T = unknown> {
         return result as unknown as Schema<U>;
     }
 
-    type<T>(): Schema<T> {
-        return new TypeSchema<T>();
+    type<T>(): TypeSchema<T> {
+        return new TypeSchema<T>(this);
+    }
+
+    get any(): AnySchema {
+        return new AnySchema(this);
+    }
+
+    get unknown(): UnknownSchema {
+        return new UnknownSchema(this);
     }
 
     fallback(value: T): this {
@@ -215,7 +223,22 @@ export abstract class Schema<T = unknown> {
 }
 
 export class TypeSchema<T> extends Schema<T> {
-    protected _normalize(input: unknown): T {
-        return input as T;
+    constructor(
+        protected inner?: Schema,
+    ) { super(); }
+
+    protected _normalize(input: unknown, ctx: ParseContext): T {
+        return this.inner ?
+            this.invokeNormalize(this.inner, input, ctx) as T :
+            input as T;
     }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class AnySchema extends TypeSchema<any> {
+    //
+}
+
+export class UnknownSchema extends TypeSchema<unknown> {
+    //
 }
