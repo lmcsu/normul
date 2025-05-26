@@ -1,9 +1,10 @@
 import type { ParseContext } from '../../types.js';
+import { isBoolean } from '../../utils.js';
 import { Schema } from '../Schema.js';
 
 export class BooleanSchema extends Schema<boolean> {
     protected _normalize(input: unknown, ctx: ParseContext): boolean {
-        if (typeof input === 'boolean') {
+        if (isBoolean(input)) {
             return input;
         }
 

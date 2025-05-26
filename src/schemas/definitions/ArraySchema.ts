@@ -1,4 +1,5 @@
 import type { ParseContext, Simplify } from '../../types.js';
+import { isArray } from '../../utils.js';
 import { Schema } from '../Schema.js';
 import { UnionSchema } from './UnionSchema.js';
 
@@ -18,7 +19,7 @@ export class ArraySchema<T extends [Schema, ...Schema[]]> extends Schema<InferAr
 
     protected _normalize(input: unknown, ctx: ParseContext): InferArray<T> {
         let array: unknown[];
-        if (Array.isArray(input)) {
+        if (isArray(input)) {
             array = input;
         } else {
             this.makeIssue({

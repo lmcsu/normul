@@ -1,4 +1,5 @@
 import type { ParseContext } from '../../types.js';
+import { isObject } from '../../utils.js';
 import { Schema } from '../Schema.js';
 
 export class RecordSchema<K extends string | number, V> extends Schema<Record<K, V>> {
@@ -8,7 +9,7 @@ export class RecordSchema<K extends string | number, V> extends Schema<Record<K,
     ) { super(); }
 
     protected _normalize(input: unknown, ctx: ParseContext): Record<K, V> {
-        if (Object.prototype.toString.call(input) !== '[object Object]') {
+        if (!isObject(input)) {
             this.makeIssue({
                 ctx,
                 message: 'Converted to object',

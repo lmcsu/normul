@@ -1,9 +1,10 @@
 import type { ParseContext } from '../../types.js';
+import { isString } from '../../utils.js';
 import { Schema } from '../Schema.js';
 
 export class StringSchema extends Schema<string> {
     protected _normalize(input: unknown, ctx: ParseContext): string {
-        if (typeof input === 'string') {
+        if (isString(input)) {
             return input;
         }
 

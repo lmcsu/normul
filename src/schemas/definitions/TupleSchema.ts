@@ -1,4 +1,5 @@
 import type { ParseContext } from '../../types.js';
+import { isArray } from '../../utils.js';
 import { Schema } from '../Schema.js';
 
 export class TupleSchema<T extends unknown[]> extends Schema<T> {
@@ -9,7 +10,7 @@ export class TupleSchema<T extends unknown[]> extends Schema<T> {
     protected _normalize(input: unknown, ctx: ParseContext): T {
         let array: unknown[];
 
-        if (Array.isArray(input)) {
+        if (isArray(input)) {
             array = input;
         } else {
             this.makeIssue({

@@ -1,4 +1,5 @@
 import type { Simplify, ParseContext } from '../../types.js';
+import { isObject } from '../../utils.js';
 import { Schema } from '../Schema.js';
 
 export type Shape = Record<string, Schema>;
@@ -28,7 +29,7 @@ export class ObjectSchema<T extends Shape> extends Schema<InferShape<T>> {
     ) { super(); }
 
     protected _normalize(input: unknown, ctx: ParseContext): InferShape<T> {
-        if (Object.prototype.toString.call(input) !== '[object Object]') {
+        if (!isObject(input)) {
             this.makeIssue({
                 ctx,
                 message: 'Converted to object',

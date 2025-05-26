@@ -1,34 +1,16 @@
 import type { ParseContext } from '../../types.js';
+import { isNumber } from '../../utils.js';
 import { Schema } from '../Schema.js';
 
 export class NumberSchema extends Schema<number> {
     protected _normalize(input: unknown, ctx: ParseContext): number {
-        if (
-            typeof input === 'number' &&
-            !Number.isNaN(input) &&
-            input !== Infinity &&
-            input !== -Infinity
-        ) {
+        if (isNumber(input)) {
             return input;
         }
 
         const number = Number(input);
 
-        if (
-            Number.isNaN(number) ||
-            number === Infinity ||
-            number === -Infinity
-        ) {
-            this.makeIssue({
-                ctx,
-                message: 'Converted to 0',
-                level: 'warn',
-                expected: 'number',
-                received: input,
-            });
-
-            return 0;
-        } else {
+        if (isNumber(number)) {
             this.makeIssue({
                 ctx,
                 message: 'Converted to number',
@@ -38,6 +20,16 @@ export class NumberSchema extends Schema<number> {
             });
 
             return number;
+        } else {
+            this.makeIssue({
+                ctx,
+                message: 'Converted to 0',
+                level: 'warn',
+                expected: 'number',
+                received: input,
+            });
+
+            return 0;
         }
     }
 }
