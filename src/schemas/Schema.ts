@@ -1,12 +1,5 @@
 import type { Issue, ParseContext, ParseResult } from '../types.js';
 
-const ISSUE_LEVELS = {
-    none: 0,
-    error: 1,
-    warn: 2,
-    info: 3,
-} as const satisfies Record<'none' | Issue['level'], number>;
-
 export abstract class Schema<T = unknown> {
     protected modifiers: ((
         input: unknown,
@@ -14,11 +7,7 @@ export abstract class Schema<T = unknown> {
         next: (input: unknown, ctx: ParseContext) => unknown,
     ) => unknown)[] = [];
 
-    normalize(input: unknown, options?: {
-        issueLevel: keyof typeof ISSUE_LEVELS;
-    }): ParseResult<T> {
-        const { issueLevel = 'warn' } = options ?? {};
-
+    normalize(input: unknown): ParseResult<T> {
         const ctx: ParseContext = {
             path: [],
             issues: [],
@@ -26,17 +15,9 @@ export abstract class Schema<T = unknown> {
 
         const data = this.invokeNormalize(this, input, ctx);
 
-        let issues: Issue[] = [];
-        const issueLevelThreshold = ISSUE_LEVELS[issueLevel];
-        if (issueLevelThreshold > 0) {
-            issues = ctx.issues.filter((issue) => {
-                return ISSUE_LEVELS[issue.level] <= issueLevelThreshold;
-            });
-        }
-
         return {
             data,
-            issues,
+            issues: ctx.issues,
         };
     }
 
